@@ -93,6 +93,9 @@ class SliceExctractor(nn.Module):
         return volume[torch.unbind(idx, dim=-1)].view(self.limit, self.limit, self.batch_size, 2).permute(2, 3, 0, 1)
 
     def forward(self, volume, grid):
+        # debug
+        volume = volume.repeat(self.batch_size, *[1]*(volume.dim()-1))
+        
         ix = grid[:, :, :, 0]
         iy = grid[:, :, :, 1]
         iz = grid[:, :, :, 2]
@@ -155,42 +158,42 @@ component_sin_y = torch.FloatTensor([[0, 0, 1, 0, 0, 0, -1, 0, 0]])
 def cosinefy_x(x, device):
     batch_size = len(x)
     y = torch.mm(x, component_cos_x.to(device))
-    y = y.resize(batch_size * 3, 3)
+    y = y.reshape(batch_size * 3, 3)
     return y
 
 
 def sinefy_x(x, device):
     batch_size = len(x)
     y = torch.mm(x, component_sin_x.to(device))
-    y = y.resize(batch_size * 3, 3)
+    y = y.reshape(batch_size * 3, 3)
     return y
 
 
 def cosinefy_z(x, device):
     batch_size = len(x)
     y = torch.mm(x, component_cos_z.to(device))
-    y = y.resize(batch_size * 3, 3)
+    y = y.reshape(batch_size * 3, 3)
     return y
 
 
 def sinefy_z(x, device):
     batch_size = len(x)
     y = torch.mm(x, component_sin_z.to(device))
-    y = y.resize(batch_size * 3, 3)
+    y = y.reshape(batch_size * 3, 3)
     return y
 
 
 def cosinefy_y(x, device):
     batch_size = len(x)
     y = torch.mm(x, component_cos_y.to(device))
-    y = y.resize(batch_size * 3, 3)
+    y = y.reshape(batch_size * 3, 3)
     return y
 
 
 def sinefy_y(x, device):
     batch_size = len(x)
     y = torch.mm(x, component_sin_y.to(device))
-    y = y.resize(batch_size * 3, 3)
+    y = y.reshape(batch_size * 3, 3)
     return y
 
 
@@ -202,7 +205,7 @@ def R_x(g, device):
     sin_angles = sinefy_x(torch.sin(g), device)
 
     out = sin_angles + cos_angles
-    return out.resize(len(g), 3, 3) + component_1_x.to(device)
+    return out.reshape(len(g), 3, 3) + component_1_x.to(device)
 
 
 def R_z(g, device):
@@ -213,7 +216,7 @@ def R_z(g, device):
     sin_angles = sinefy_z(torch.sin(g), device)
 
     out = sin_angles + cos_angles
-    return out.resize(len(g), 3, 3) + component_1_z.to(device)
+    return out.reshape(len(g), 3, 3) + component_1_z.to(device)
 
 
 def R_y(g, device):
@@ -224,7 +227,7 @@ def R_y(g, device):
     sin_angles = sinefy_y(torch.sin(g), device)
 
     out = sin_angles + cos_angles
-    return out.resize(len(g), 3, 3) + component_1_y.to(device)
+    return out.reshape(len(g), 3, 3) + component_1_y.to(device)
 
 
 def rotmat3D_EA(g):
@@ -240,4 +243,4 @@ def rotmat3D_EA(g):
     R = torch.bmm(R_phi, R_theta)
     R = torch.bmm(R, R_psi)
 
-    return R.resize(len(g), 3, 3)
+    return R.reshape(len(g), 3, 3)
